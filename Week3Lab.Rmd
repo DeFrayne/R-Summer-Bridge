@@ -1,0 +1,78 @@
+---
+title: "CUNY Summer Bridge R Week 3 Lab"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+1.Load the diamonds dataset, which is included with the ggplot2 package. Identify which variables in the
+diamond set are numeric, and which are categorical (factors).
+```{r}
+install.packages("ggplot2")
+library("ggplot2")
+data("diamonds")
+view(diamonds)
+class(diamonds$carat) #Numeric
+class(diamonds$cut) #Ordered Factor
+class(diamonds$color) #Ordered Factor
+class(diamonds$clarity) #Ordered Factor
+class(diamonds$depth) #Numeric
+class(diamonds$table) #Numeric
+class(diamonds$price) #Integer
+class(diamonds$x) #Numeric
+class(diamonds$y) #Numeric
+class(diamonds$z) #Numeric
+```
+
+2. Generate summary level descriptive statistics: Show the mean, median, 25th and 75th quartiles, min, and
+max for each of the applicable variables in diamonds.
+```{r}
+summary(diamonds)
+```
+
+3. Determine the frequency for each of the diamond colors.
+```{r}
+D <- 0
+E <- 0
+F <- 0
+G <- 0
+H <- 0
+I <- 0
+J <- 0
+for (i in 1:length(diamonds$color)){
+  if (diamonds$color[i]=="D"){
+    D <- D+1
+  } else if (diamonds$color[i]=="E"){
+    E <- E+1
+  } else if (diamonds$color[i]=="F"){
+    F <- F+1
+  } else if (diamonds$color[i]=="G"){
+    G <- G+1
+  } else if (diamonds$color[i]=="H"){
+    H <- H+1
+  } else if (diamonds$color[i]=="I"){
+    I <- I+1
+  } else if (diamonds$color[i]=="J"){
+    J <- J+1
+  } 
+}
+```
+
+4. Determine the frequency for each of the diamond cuts, by color.
+```{r}
+table(diamonds$color, diamonds$cut)
+```
+
+5. Create a graph for a single numeric variable.
+```{r}
+boxplot(diamonds$price)
+qplot(price, data=diamonds)
+```
+
+6. Create a scatterplot of two numeric variables.
+```{r}
+plot(diamonds$price ~ diamonds$carat)
+qplot(carat, price, data=diamonds)
+```

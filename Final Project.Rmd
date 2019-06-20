@@ -1,0 +1,329 @@
+---
+title: "R-Final Project"
+output: html_document
+---
+#R Bridge Course Final Project
+This is a final project to show off what you have learned. Select your data set from the list below:
+http://vincentarelbundock.github.io/Rdatasets/ (click on the csv index for a list). Another good source is
+found here:
+https://https://archive.ics.uci.edu/ml/datasets.html
+The presentation approach is up to you but it should contain the following:
+
+1. Data Exploration: This should include summary statistics, means, medians, quartiles, or any
+other relevant information about the data set. Please include some conclusions in the R
+Markdown text.
+
+2. Data wrangling: Please perform some basic transformations. They will need to make sense but
+could include column renaming, creating a subset of the data, replacing values, or creating new
+columns with derived data (for example - if it makes sense you could sum two columns
+together)
+
+3. Graphics: Please make sure to display at least one scatter plot, box plot and histogram. Don't
+be limited to this. Please explore the many other options in R packages such as ggplot2.
+
+4. Meaningful question for analysis: Please state at the beginning a meaningful question for
+analysis. Use the first three steps and anything else that would be helpful to answer the
+question you are posing from the data set you chose. Please write a brief conclusion paragraph
+in R markdown at the end.
+
+5. BONUS - place the original .csv in a github file and have R read from the link. This will be a very
+useful skill as you progress in your data science education and career.
+Please submit your .rmd file and the .csv file as well as a link to your RPubs.
+
+#Data.frame Column Definitions
+Year
+numeric year 1947:2012
+
+Number.thousands
+number of families in the US
+
+quintile1, quintile2, median, quintile3, quintile4, p95
+quintile1, quintile2, quintile3, quintile4, and p95 are the indicated quantiles of the distribution of family income from US Census Table F-1. The media is computed as the geometric mean of quintile2 and quintile3. This is accurate to the extent that the lognormal distribution adequately approximates the central 20 percent of the income distribution, which it should for most practical purposes.
+
+P90, P95, P99, P99.5, P99.9, P99.99
+The indicated quantiles of family income per Piketty and Saez
+
+realGDP.M, GDP.Deflator, PopulationK, realGDPperCap
+real GDP in millions, GDP implicit price deflators, US population in thousands, and real GDP per capita, according to MeasuringWorth.com.
+
+P95IRSvsCensus
+ratio of the estimates of the 95th percentile of distributions of family income from the Piketty and Saez analysis of data from the Internal Revenue Service (IRS) and from the US Census Bureau.
+
+The IRS has ranged between 72 and 98 percent of the Census Bureau figures for the 95th percentile of the distribution, with this ratio averaging around 75 percent since the late 1980s. However, this systematic bias is modest relative to the differences between the different quantiles of interest in this combined dataset.
+
+personsPerFamily
+average number of persons per family using the number of families from US Census Table F-1 and the population from MeasuringWorth.com.
+
+realGDPperFamily
+personsPerFamily * realGDPperCap
+
+mean.median
+ratio of realGDPperFamily to the median. This is a measure of skewness and income inequality.
+
+```{r}
+income <- read.table(file="https://raw.githubusercontent.com/DeFrayne/SQL-Summer-Bridge/master/incomeInequality.csv", header=TRUE, sep=",")
+require(ggplot2)
+require(ggedit)
+summary(income)
+```
+#Question: to what degree has family income inequality increased in the United States during the 1974-2012 time period?
+
+```{r}
+ggplot(income,aes(Year,median)) + geom_path() + scale_y_continuous(breaks=seq(0,max(income$median),5000)) + expand_limits(y=0) + scale_x_continuous(breaks=seq(min(income$Year),max(income$Year),5)) + ylab("Income")
+```
+
+Median income in the United States from 1947 to 2012.
+
+```{r}
+ggplot(income,aes(Year,median)) + geom_path() + scale_y_continuous(breaks=seq(0,max(income$median),5000)) + expand_limits(y=0) + scale_x_continuous(breaks=seq(min(income$Year),max(income$Year),5)) + ylab("Income") + geom_smooth(method='lm')
+```
+
+Median income in the United States from 1947 to 2012.
+
+-Added a best fit line; shows overall median income growth during this period.
+
+```{r}
+median1937to1973 <- income[1:28,]
+median1973to2007 <- income[28:61,]
+median2007to2012 <- income[61:66,]
+ggplot(income,aes(Year,median)) + geom_path() + scale_y_continuous(breaks=seq(0,max(income$median),5000)) + expand_limits(y=0) + scale_x_continuous(breaks=seq(min(income$Year),max(income$Year),5)) + ylab("Income") + geom_smooth(method='lm', data=median2007to2012,color="Red") + geom_smooth(method='lm', data=median1937to1973, color="Green") + geom_smooth(method='lm', data=median1973to2007, color="Yellow")
+```
+
+Median income in the United States from 1947 to 2012.
+
+-Best fit line broken into three based on visual trends; slower growth after 1974, significant downturn after 2007.
+
+-Trade Act of 1974; removed international trade barriers and allowed the U.S. President to renegotiate tariffs without congressional approval.
+
+-Housing market downturn and eventual crash in 2007-2009.
+
+```{r}
+q1_1937to1973 <- income[1:28,]
+q1_1973to2007 <- income[28:61,]
+q1_2007to2012 <- income[61:66,]
+ggplot(income,aes(Year,quintile1)) + geom_path() + scale_y_continuous(breaks=seq(0,max(income$median),5000)) + expand_limits(y=0) + expand_limits(y=max(income$median)) + scale_x_continuous(breaks=seq(min(income$Year),max(income$Year),5)) + ylab("Income") + geom_smooth(method='lm', data=median2007to2012,color="Red") + geom_smooth(method='lm', data=median1937to1973, color="Green") + geom_smooth(method='lm', data=median1973to2007, color="Yellow")
+```
+
+First quintile (bottom 20%) of income in the United States from 1947 to 2012.
+
+-Significanly less growth over time.
+
+```{r}
+(income$quintile1[61] - income$quintile1[28])/(2007-1974)
+```
+-Growth almost entirely stagnant from 1974 to 2007; $82 in family income growth per year.
+
+```{r}
+income$quintile1[28] - income$quintile1[66]
+```
+-2007 nearly returns first quintile income to 1974 values; net income gain is $370 per family.
+
+```{r}
+income$median[66] - income$median[1]
+```
+
+How much has median income changed from 1947 to 2012?
+
+```{r}
+income$quintile1[66] - income$quintile1[1]
+```
+
+How much has first quintile income changed from 1947 to 2012?
+
+```{r}
+income$median[1] - income$quintile1[1]
+```
+
+What was the difference between median income and first quintile income in 1947?
+```{r}
+income$median[66] - income$quintile1[66]
+```
+
+What was the difference between median income and first quintile income in 2012?
+
+```{r}
+ggplot(income,aes(x=Year)) + scale_x_continuous(breaks=seq(min(income$Year),max(income$Year),5)) + scale_y_continuous(breaks=seq(0,max(income$median),5000)) + expand_limits(y=0) + ylab("Income") + geom_line(aes(y=income$median)) + geom_line(aes(y=income$quintile1),color ="Red1") + geom_smooth(aes(y=income$median), method='lm') + geom_smooth(aes(y=income$quintile1), method='lm')
+```
+
+Regression line for median and first quintile income; clearly shows a difference in income growth rates.
+
+Black = Median
+
+Red = First Quintile (Bottom 20%)
+
+```{r}
+ggplot(income,aes(x=Year)) + scale_x_continuous(breaks=seq(min(income$Year),max(income$Year),5)) + scale_y_continuous(breaks=seq(0,max(income$realGDPperFamily),25000)) + expand_limits(y=0) + ylab("Income") + geom_line(aes(y=income$median)) + geom_line(aes(y=income$quintile1),color ="Red1") + geom_line(aes(y=income$realGDPperFamily),color="NavyBlue")
+```
+
+This graph adds in GDP per Family (not per Capita).
+
+-y-axis maximum changed to 200,000.
+
+-GDP per Family is increasing much faster than the median income.
+
+-Black = median
+
+-Red = First Quinetie (Bottom 20%)
+
+-Dark Blue = Real GDP per Family
+
+```{r}
+ggplot(income,aes(x=Year)) + scale_y_continuous(breaks=seq(0,max(income$realGDPperFamily),25000),labels = scales::comma) + expand_limits(y=0) + scale_x_continuous(breaks=seq(min(income$Year),max(income$Year),5)) + geom_line(aes(y=income$realGDPperFamily),color="NavyBlue") + geom_line(aes(y=income$quintile1),color ="Red1") + geom_line(aes(y=income$median),color ="Black") + geom_line(aes(y=income$P95),color="Brown") + ylab("Income")
+```
+
+This graph adds in the top 5% in family income in the United States.
+
+-GDP per Family is increasing at a rate similar to the top 5% of income in the United States.
+
+-Notice 2008-2012 trend.
+
+-Black = median
+
+-Red = First Quinetie (Bottom 20%)
+
+-Dark Blue = Real GDP per Family
+
+-Brown = Top 5% in family income.
+
+```{r}
+ggplot(income,aes(x=Year)) + scale_y_continuous(breaks=seq(0,max(income$P99),50000),labels = scales::comma) + expand_limits(y=0) + scale_x_continuous(breaks=seq(min(income$Year),max(income$Year),5)) + geom_line(aes(y=income$realGDPperFamily),color="NavyBlue") + geom_line(aes(y=income$quintile1),color ="Red1") + geom_line(aes(y=income$median),color ="Black") + geom_line(aes(y=income$P95),color="Brown")  + geom_line(aes(y=income$P99),color="Purple") + ylab("Income")
+```
+
+This graph adds in the top 1% in family income in the United States.
+
+-Income scale maximum increased to 400,000
+
+-1963 Kennedy tax cut for those making > $200,000; from 91% to 65%.
+
+-The 1963 spike only shows up for the top 1% of income.
+
+-Some other spikes to be discussed later.
+
+-Black = median
+
+-Red = First Quinetie (Bottom 20%)
+
+-Dark Blue = Real GDP per Family
+
+-Brown = Top 5% in family income.
+
+-Purple = Top 1% in family income.
+
+```{r}
+ggplot(income,aes(x=Year)) + scale_y_continuous(breaks=seq(0,max(income$P99.5),50000),labels = scales::comma) + expand_limits(y=0) + scale_x_continuous(breaks=seq(min(income$Year),max(income$Year),5)) + geom_line(aes(y=income$realGDPperFamily),color="NavyBlue") + geom_line(aes(y=income$quintile1),color ="Red1") + geom_line(aes(y=income$median),color ="Black") + geom_line(aes(y=income$P95),color="Brown")  + geom_line(aes(y=income$P99),color="Purple") + geom_line(aes(y=income$P99.5),color="Seagreen") + ylab("Income")
+```
+
+This graph adds in the top 0.5% in family income in the United States.
+
+-Income scale maximum increased to 650,000.
+
+-1994 is the signing of NAFTA.
+
+-Outsourcing takes off as a common corporate practice in the 90s.
+
+-Black = median
+
+-Red = First Quinetie (Bottom 20%)
+
+-Dark Blue = Real GDP per Family
+
+-Brown = Top 5% in family income.
+
+-Purple = Top 1% in family income.
+
+-Green = Top 0.5% in family income.
+
+```{r}
+ggplot(income,aes(x=Year)) + scale_y_continuous(breaks=seq(0,max(income$P99.9),250000),labels = scales::comma) + expand_limits(y=0) + scale_x_continuous(breaks=seq(min(income$Year),max(income$Year),5)) + geom_line(aes(y=income$realGDPperFamily),color="NavyBlue") + geom_line(aes(y=income$quintile1),color ="Red1") + geom_line(aes(y=income$median),color ="Black") + geom_line(aes(y=income$P95),color="Brown")  + geom_line(aes(y=income$P99),color="Purple") + geom_line(aes(y=income$P99.5),color="Green") + geom_line(aes(y=income$P99.9),color="Blue") + ylab("Income")
+```
+
+This graph adds in the top 0.1% in family income in the United States.
+
+-Income scale maximum increased to 2,250,000.
+
+-2001 the World Trade Center is attacked.
+
+-Black = median
+
+-Red = First Quinetie (Bottom 20%)
+
+-Dark Blue = Real GDP per Family
+
+-Brown = Top 5% in family income.
+
+-Purple = Top 1% in family income.
+
+-Green = Top 0.5% in family income.
+
+-Blue = Top 0.1% in family income.
+
+```{r}
+ggplot(income,aes(x=Year)) + scale_y_continuous(breaks=seq(0,max(income$P99.99),1000000),labels = scales::comma) + expand_limits(y=0) + scale_x_continuous(breaks=seq(min(income$Year),max(income$Year),5)) + geom_line(aes(y=income$realGDPperFamily),color="NavyBlue") + geom_line(aes(y=income$quintile1),color ="Red1") + geom_line(aes(y=income$median),color ="Black") + geom_line(aes(y=income$P95),color="Brown")  + geom_line(aes(y=income$P99),color="Purple") + geom_line(aes(y=income$P99.5),color="Green") + geom_line(aes(y=income$P99.9),color="Blue") + geom_line(aes(y=income$P99.99),color="DarkRed") + ylab("Income")
+```
+
+This graph adds in the top 0.01% in family income in the United States.
+
+-Income scale maximum increased to 12,000,000.
+
+-2001 the World Trade Center is attacked.
+
+-1981 Ronald Reagan tax cuts lower the tax rate for the wealthiest to 50%.
+
+-1986 it is lowered again by Reagan to 28%.
+
+-Black = median
+
+-Red = First Quinetie (Bottom 20%)
+
+-Dark Blue = Real GDP per Family
+
+-Brown = Top 5% in family income.
+
+-Purple = Top 1% in family income.
+
+-Green = Top 0.5% in family income.
+
+-Blue = Top 0.1% in family income.
+
+-Dark Red = Top 0.01% in family income.
+
+```{r}
+hist(income$personsPerFamily, main = "Histogram of Mean Family Unit Size, 1947-2012", xlab = "Mean Family Size", col="SkyBlue",border="Seagreen")
+```
+
+American family size has remained approximately the same over the last 70 years.
+
+```{r}
+boxplot(income$quintile1,income$median,income$P95,income$P99,income$P99.5,income$P99.9,income$P99.99, col="SkyBlue")
+```
+
+Another way to view income inequality.
+
+1 = Quintile 1
+
+2 = Median
+
+3 = Top 5%
+
+4 = Top 1%
+
+5 = Top 0.5%
+
+6 = Top 0.1%
+
+7 = Top 0.01%
+
+```{r}
+scatter.smooth(income$Year,income$mean.median, xlab="Year", ylab="Mean Income Divided by Median Income")
+```
+
+Remember our question: To what degree has family income inequality increased in the United States during the 1974-2012 time period? There is no one gauge for measuring income inequality in the United States. Within the confines of this data set one could look at growth between different income percentiles, rates of growth, and compare overall growth to current rates of growth. While mean family size has been fairly consistent during the 1947-2012 time period, this dataset does not take the number of family members working into account. If lower income families are more likely to have multiple jobs and/or multiple working family members than higher income families, then inequality has increased even further than the data suggests. This would especially be the case if more family members have become employed over time among the lower income brackets.
+
+One thing is clear: the degree of separation between the top brackets of income and other income brackets has increased significantly over time. This suggests that a look at individual income across families would contain a many outliers toward the upper end of the income scale. When we have unidirectional outliers in data, mean becomes less accurate - the data becomes skewed. Median values help remove unidirectional outliers in data sets. When mean and median are more similar, there are fewer or less extreme unidirectional outliers. If the mean is significantly higher than the median, then the higher values in the set deviate from the median more than the lower values in the set. As a result, a graph of Mean/Median can show how cumulative unidirectional outliers above the mean have increased over time, which is one measure of income inequality.
+
+```{r}
+(max(income$mean.median) - min(income$mean.median))/min(income$mean.median)*100
+(income$mean.median[66] - income$mean.median[1])/income$mean.median[1]*100
+```
+
+By this measure, income inequality has increased by approximately 76% from its minimum to 2012; if measured from 1974, the increase is approximately 59%. Given the massive disparities visualized in the graphs, this may seem small. It's important to remember that the 0.01% is just that - a small fraction of the population numbering 1 in 1000. Regardless of their income, the other 99.99% of Americans have income values significantly lower than theirs. One could also look at the disparity in visualized changes vs. mean/median shift in another way: that the number of individuals economically underperforming relative to the 0.01% is so massive that their multi-million dollar incomes are marginalized when the mean is taken.

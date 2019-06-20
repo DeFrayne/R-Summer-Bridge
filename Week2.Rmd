@@ -1,0 +1,97 @@
+---
+title: "Week2"
+output: html_document
+---
+
+The dataset that I chose for this week's assignment is:
+http://vincentarelbundock.github.io/Rdatasets/csv/carData/Anscombe.csv
+
+File background can be found at:
+http://vincentarelbundock.github.io/Rdatasets/doc/carData/Anscombe.html
+
+Labels:
+education
+Per-capita education expenditures, dollars.
+
+income
+Per-capita income, dollars.
+
+young
+Proportion under 18, per 1000.
+
+urban
+Proportion urban, per 1000.
+ 
+```{r}
+edudata <- read.table(file="http://vincentarelbundock.github.io/Rdatasets/csv/carData/Anscombe.csv", header=TRUE, sep=",")
+edudata
+```
+
+#Question 1: Use the summary function to gain an overview of the data set. Then display the mean and
+#median for at least two attributes.
+```{r}
+summary(edudata)
+mean(edudata[,2]) #196.3137
+mean(edudata[,3]) #3225.294
+median(edudata[,2]) #192
+median(edudata[,3]) #3257
+```
+
+#Question 2: Create a new data frame with a subset of the columns and rows. Make sure to rename it.
+```{r}
+edudf <- data.frame(edudata[1:10,1:3])
+edudf
+```
+
+#Question 3: Create new column names for the new data frame.
+```{r}
+names(edudf)[1]="State"
+names(edudf)[2]="Per Capita Spending"
+names(edudf)[3]="Per Capita Income"
+```
+
+#Question 4: Use the summary function to create an overview of your new data frame. The print the mean
+#and median for the same two attributes. Please compare.
+```{r}
+summary(edudf)
+mean(edudf[,2]) #197.7
+mean(edudf[,3]) #3582.8
+median(edudf[,2]) #191
+median(edudf[,3]) #3529
+```
+The means of the data set using only the states ME, NH, VT, MA, RI, CT, NY, NJ, PA, and OH are higher than the full data set. These states are all in the northern half of the United States, which suggests that average education spending and income are slightly higher in these regions compared to the United States as a whole. While the mean for per capita education spending went up when only a subset of northern states were selected, the median decreased. The income mean and median went up in the subset, suggesting higher average income in the northern state subset.
+
+#Question 5: For at least 3 values in a column please rename so that every value in that column is renamed.
+#For example, suppose I have 20 values of the letter "e" in one column. Rename those values so
+#that all 20 would show as "excellent".
+```{r}
+require(stringi)
+edudf$State <- as.character(edudf$State)
+edudf$State[1]<-"Minnesota"
+edudf$State[2]<-"New Hampshire"
+edudf$State[3]<-"Vermont"
+edudf$State[4]<-"Massachusetts"
+edudf$State[5]<-"Rhode Island"
+edudf$State[6]<-"Connecticut"
+edudf$State[7]<-"New York"
+edudf$State[8]<-"New Jersey"
+edudf$State[9]<-"Pennsylvania"
+edudf$State[10]<-"Ohio"
+for (i in 1:10){
+    if (stri_detect_fixed(edudf$State[i],"nn")==TRUE)
+    {
+        edudf$State[i]<-"Nuclear Wasteland"
+    }
+}
+```
+
+#Question 6: Display enough rows to see examples of all of steps 1-5 above.
+```{r}
+edudf
+```
+
+#Question 7: BONUS - place the original .csv in a github file and have R read from the link. This will be a very
+#useful skill as you progress in your data science education and career.
+```{r}
+datastuff <- read.table(file="https://raw.githubusercontent.com/DeFrayne/SQL-Summer-Bridge/master/Anscombe.csv", header=TRUE, sep=",")
+```
